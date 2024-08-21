@@ -12,7 +12,7 @@ export const getUserImageSrc = (imagePath?: string | null) => {
     }
 };
 
-export const getSupabaseFileUrl = (filePath: string) => {
+export const getSupabaseFileUrl = (filePath?: string) => {
     if (filePath) {
         return {
             uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}`,
@@ -52,4 +52,20 @@ export const uploadFile = async (folderName: string, fileUri: string, isImage: b
 
 export const getFileName = (folderName: string, isImage: boolean) => {
     return `/${folderName}/${new Date().getTime()}${isImage ? '.png' : '.mp4'}`;
+};
+
+export const getLocalFilePath = (filePath: string) => {
+    let fileName = filePath.split('/').pop();
+
+    return `${FileSystem.documentDirectory}${fileName}`;
+};
+
+export const downloadFile = async (url: string) => {
+    try {
+        const { uri } = await FileSystem.downloadAsync(url, getLocalFilePath(url));
+
+        return uri;
+    } catch (error) {
+        return null;
+    }
 };

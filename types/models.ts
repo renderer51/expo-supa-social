@@ -1,3 +1,20 @@
+export interface IPost {
+    body: string;
+    created_at: Date;
+    file: string;
+    id: string;
+    postLikes: IPostLike[];
+    userId: string;
+    user: IUser;
+}
+
+export interface IPostLike {
+    created_at: Date;
+    id: string;
+    postId: string;
+    userId: string;
+}
+
 export interface IUser {
     address: string | null;
     bio: string | null;

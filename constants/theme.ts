@@ -43,7 +43,7 @@ export const theme: ITheme = {
         textLight: '#7C7C7C',
         textDark: '#1D1D1D',
 
-        rose: '#EF44444',
+        rose: '#EF4444',
         roseLight: '#F87171',
     },
     fonts: {

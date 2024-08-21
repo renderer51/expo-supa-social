@@ -1,16 +1,61 @@
-import React, { FC } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { FC, useEffect, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import Icon from '@/assets/icons';
-import { Avatar, ScreenWrapper } from '@/components';
+import { Avatar, Loading, PostCard, ScreenWrapper } from '@/components';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { hp, wp } from '@/helpers';
+import { fetchPosts, getUserData } from '@/services';
+import { IPost } from '@/types';
 
+let limit = 0;
 const Home: FC = () => {
     const router = useRouter();
     const { user } = useAuth();
+
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [posts, setPosts] = useState<IPost[]>([]);
+
+    const getPosts = async () => {
+        limit = limit + 4;
+
+        /** Call the api here */
+        if (!hasMore) {
+            return null;
+        }
+        let res = await fetchPosts(limit);
+
+        if (res.success) {
+            if (posts.length === res.data?.length) {
+                setHasMore(false);
+            }
+            setPosts(Array(res.data) ? (res.data as IPost[]) : []);
+        }
+    };
+
+    const handlePostEvent = async (payload: any) => {
+        if (payload.eventType === 'INSERT' && payload?.new?.id) {
+            let newPost = { ...payload.new };
+            let res = await getUserData(newPost.userId);
+            newPost.user = res.success ? res.data : {};
+
+            setPosts((prev) => [newPost, ...prev]);
+        }
+    };
+
+    useEffect(() => {
+        let postChannel = supabase
+            .channel('posts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, handlePostEvent)
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(postChannel);
+        };
+    }, []);
 
     return (
         <ScreenWrapper bg={'white'}>
@@ -30,6 +75,28 @@ const Home: FC = () => {
                     </Pressable>
                 </View>
             </View>
+
+            {/** Posts */}
+            <FlatList
+                ListFooterComponent={
+                    hasMore ? (
+                        <View style={{ marginVertical: posts.length === 0 ? 200 : 30 }}>
+                            <Loading />
+                        </View>
+                    ) : (
+                        <View style={{ marginVertical: 30 }}>
+                            <Text style={styles.noPosts}>{'No more posts'}</Text>
+                        </View>
+                    )
+                }
+                contentContainerStyle={styles.listStyle}
+                data={posts}
+                keyExtractor={(item) => `Post-${item.id}`}
+                onEndReached={() => getPosts()}
+                onEndReachedThreshold={0}
+                renderItem={({ item }) => <PostCard currentUser={user} item={item} router={router} />}
+                showsVerticalScrollIndicator={false}
+            />
         </ScreenWrapper>
     );
 };
