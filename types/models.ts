@@ -1,5 +1,6 @@
 export interface IPost {
     body: string;
+    comments: any[];
     created_at: Date;
     file: string;
     id: string;

@@ -19,6 +19,7 @@ interface PostCardProps {
     hasShadow?: boolean;
     item: IPost;
     router: Router;
+    showMoreIcon?: boolean;
 }
 
 const textStyle = {
@@ -38,7 +39,7 @@ const tagsStyles = {
     p: textStyle,
 };
 
-const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow, item, router }) => {
+const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow = true, item, router, showMoreIcon = true }) => {
     const shadowStyles = {
         elevation: 1,
         shadowOffset: { height: 2, width: 0 },
@@ -71,6 +72,10 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow, item, router }) =
     };
 
     const openPostDetails = async () => {
+        if (!showMoreIcon) {
+            return null;
+        }
+
         router.push({ pathname: '/(main)/postDetails', params: { postId: item?.id } });
     };
 
@@ -79,7 +84,7 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow, item, router }) =
         if (item.file) {
             /** Download the file then share the local uri */
             setLoading(true);
-            let url = await downloadFile(getSupabaseFileUrl(item?.file)?.uri);
+            let url = await downloadFile(getSupabaseFileUrl(item?.file)?.uri || '');
             setLoading(false);
             content.url = url;
         }
@@ -103,9 +108,11 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow, item, router }) =
                     </View>
                 </View>
 
-                <TouchableOpacity activeOpacity={0.7}>
-                    <Icon color={theme.colors.text} name={'threeDotsHorizontal'} size={hp(3.4)} strokeWidth={3} />
-                </TouchableOpacity>
+                {showMoreIcon && (
+                    <TouchableOpacity activeOpacity={0.7}>
+                        <Icon color={theme.colors.text} name={'threeDotsHorizontal'} size={hp(3.4)} strokeWidth={3} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View style={styles.content}>
@@ -153,7 +160,7 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow, item, router }) =
                         <TouchableOpacity activeOpacity={0.7} onPress={openPostDetails}>
                             <Icon color={theme.colors.textLight} name={'comment'} size={24} />
                         </TouchableOpacity>
-                        <Text style={styles.count}>{'2'}</Text>
+                        <Text style={styles.count}>{item?.comments[0]?.count}</Text>
                     </View>
                     <View style={styles.footerButton}>
                         {loading ? (
