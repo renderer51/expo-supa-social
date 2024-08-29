@@ -28,7 +28,7 @@ const CommentItem: FC<CommentItemProps> = ({ canDelete = false, comment, onDelet
             <View style={styles.content}>
                 <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={styles.nameContainer}>
-                        <Text style={styles.text}>{comment?.usr?.name}</Text>
+                        <Text style={styles.text}>{comment?.user?.name}</Text>
                         <Text>{'•'}</Text>
                         <Text style={[styles.text, { color: theme.colors.textLight }]}>
                             {moment(comment?.usr?.created_at).format('MMM d')}
@@ -41,9 +41,9 @@ const CommentItem: FC<CommentItemProps> = ({ canDelete = false, comment, onDelet
                         </TouchableOpacity>
                     )}
                 </View>
-            </View>
 
-            <Text style={[styles.text, { fontWeight: 'normal' }]}>{comment.text}</Text>
+                <Text style={[styles.text, { fontWeight: 'normal' }]}>{comment.text}</Text>
+            </View>
         </View>
     );
 };

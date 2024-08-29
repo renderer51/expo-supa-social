@@ -1,14 +1,15 @@
-import React, { FC } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { FC, useState } from 'react';
+import { Alert, FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Router, useRouter } from 'expo-router';
 
 import Icon from '@/assets/icons';
-import { Avatar, Header, ScreenWrapper } from '@/components';
+import { Avatar, Header, Loading, PostCard, ScreenWrapper } from '@/components';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { hp, wp } from '@/helpers';
 import { supabase } from '@/lib/supabase';
-import { IUser } from '@/types';
+import { fetchPosts } from '@/services';
+import { IPost, IUser } from '@/types';
 
 interface UserHeader {
     handleLogout?: () => void;
@@ -67,9 +68,13 @@ const UserHeader: FC<UserHeader> = ({ handleLogout, router, user }) => {
     );
 };
 
+var limit = 0;
 const Profile: FC = () => {
     const { user, setAuth } = useAuth();
     const router = useRouter();
+
+    const [posts, setPosts] = useState<IPost[]>([]);
+    const [hasMore, setHasMore] = useState<boolean>(true);
 
     const onLogout = async () => {
         setAuth?.(null);
@@ -77,6 +82,22 @@ const Profile: FC = () => {
 
         if (error) {
             Alert.alert('Sign out', 'Error signing out');
+        }
+    };
+
+    const getPosts = async () => {
+        if (!hasMore) {
+            return null;
+        }
+
+        limit = limit + 10;
+
+        let res = await fetchPosts(limit, user?.id);
+        if (res.success) {
+            if (posts.length === res.data?.length) {
+                setHasMore(false);
+            }
+            setPosts(res.data || []);
         }
     };
 
@@ -98,7 +119,30 @@ const Profile: FC = () => {
 
     return (
         <ScreenWrapper bg={'white'}>
-            <UserHeader handleLogout={handleLogout} router={router} user={user} />
+            <FlatList
+                ListFooterComponent={
+                    hasMore ? (
+                        <View style={{ marginVertical: posts.length === 0 ? 100 : 30 }}>
+                            <Loading />
+                        </View>
+                    ) : (
+                        <View style={{ marginVertical: 30 }}>
+                            <Text style={{ marginVertical: 30 }}>{'No more posts'}</Text>
+                        </View>
+                    )
+                }
+                ListHeaderComponent={<UserHeader handleLogout={handleLogout} router={router} user={user} />}
+                ListHeaderComponentStyle={{ marginBottom: 30 }}
+                contentContainerStyle={styles.listStyle}
+                data={posts}
+                keyExtractor={(item) => `${item.id}`}
+                onEndReached={() => {
+                    getPosts();
+                }}
+                onEndReachedThreshold={0}
+                renderItem={({ item }) => <PostCard currentUser={user} item={item} router={router} />}
+                showsVerticalScrollIndicator={false}
+            />
         </ScreenWrapper>
     );
 };

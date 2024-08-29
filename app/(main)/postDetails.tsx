@@ -8,7 +8,8 @@ import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { hp, wp } from '@/helpers';
 import { supabase } from '@/lib/supabase';
-import { createPostComment, fetchPostDetails, getUserData, removePostComment } from '@/services';
+import { createPostComment, fetchPostDetails, getUserData, removePost, removePostComment } from '@/services';
+import { IPost } from '@/types';
 
 const PostDetails: FC = () => {
     const { user } = useAuth();
@@ -87,6 +88,20 @@ const PostDetails: FC = () => {
         }
     };
 
+    const onDeletePost = async (item: IPost) => {
+        let res = await removePost(item.id);
+        if (res.success) {
+            router.back();
+        } else {
+            Alert.alert('Post', res.msg);
+        }
+    };
+
+    const onEditPost = (item: IPost) => {
+        router.back();
+        router.push({ pathname: '/(main)/newPost', params: { ...item } });
+    };
+
     useEffect(() => {
         let commentChannel = supabase
             .channel('comments')
@@ -127,7 +142,10 @@ const PostDetails: FC = () => {
                     currentUser={user}
                     hasShadow={false}
                     item={{ ...post, comments: [{ count: post.comments.length }] }}
+                    onDelete={onDeletePost}
+                    onEdit={onEditPost}
                     router={router}
+                    showDelete={true}
                     showMoreIcon={false}
                 />
 

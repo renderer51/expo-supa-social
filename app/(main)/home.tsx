@@ -20,7 +20,7 @@ const Home: FC = () => {
     const [posts, setPosts] = useState<IPost[]>([]);
 
     const getPosts = async () => {
-        limit = limit + 4;
+        limit = limit + 10;
 
         /** Call the api here */
         if (!hasMore) {
@@ -40,9 +40,26 @@ const Home: FC = () => {
         if (payload.eventType === 'INSERT' && payload?.new?.id) {
             let newPost = { ...payload.new };
             let res = await getUserData(newPost.userId);
+            newPost.postLikes = [];
+            newPost.comments = [{ count: 0 }];
             newPost.user = res.success ? res.data : {};
 
             setPosts((prev) => [newPost, ...prev]);
+        }
+        if (payload.eventType === 'DELETE' && payload?.old?.id) {
+            setPosts((prev) => prev.filter((e) => e.id !== payload?.old?.id));
+        }
+        if (payload.eventType === 'UPDATE' && payload?.new?.id) {
+            setPosts((prev) =>
+                prev.map((e) => {
+                    if (e.id === payload?.new?.id) {
+                        e.body = payload?.new?.body;
+                        e.file = payload?.new?.file;
+                    }
+
+                    return e;
+                }),
+            );
         }
     };
 

@@ -1,6 +1,6 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Video, ResizeMode } from 'expo-av';
 import { RichEditor } from 'react-native-pell-rich-editor';
@@ -16,6 +16,7 @@ import { createOrUpdatePost, getSupabaseFileUrl } from '@/services';
 const NewPost: FC = () => {
     const { user } = useAuth();
     const router = useRouter();
+    const post: any = useLocalSearchParams();
 
     const bodyRef = useRef<string>('');
     const editorRef = useRef<RichEditor>(null);
@@ -87,11 +88,15 @@ const NewPost: FC = () => {
             return;
         }
 
-        let data = {
+        let data: any = {
             body: bodyRef.current,
             file,
             userId: user?.id,
         };
+
+        if (post && post?.id) {
+            data.id === post.id;
+        }
 
         /** Create post */
         setLoading(true);
@@ -109,6 +114,16 @@ const NewPost: FC = () => {
             }
         }
     };
+
+    useEffect(() => {
+        if (post & post?.id) {
+            bodyRef.current = post?.body;
+            setFile(post?.file || null);
+            setTimeout(() => {
+                editorRef?.current?.setContentHTML(post?.body);
+            }, 300);
+        }
+    }, []);
 
     return (
         <ScreenWrapper bg={'white'}>
@@ -172,7 +187,7 @@ const NewPost: FC = () => {
                     hasShadow={false}
                     loading={loading}
                     onPress={onSubmit}
-                    title={'Post'}
+                    title={post && post?.id ? 'Update' : 'Post'}
                 />
             </View>
         </ScreenWrapper>

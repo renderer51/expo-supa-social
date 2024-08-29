@@ -18,7 +18,10 @@ interface PostCardProps {
     currentUser: IUser | null;
     hasShadow?: boolean;
     item: IPost;
+    onDelete?: (item: IPost) => void;
+    onEdit?: (item: IPost) => void;
     router: Router;
+    showDelete?: boolean;
     showMoreIcon?: boolean;
 }
 
@@ -39,7 +42,16 @@ const tagsStyles = {
     p: textStyle,
 };
 
-const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow = true, item, router, showMoreIcon = true }) => {
+const PostCard: FC<PostCardProps> = ({
+    currentUser,
+    hasShadow = true,
+    item,
+    onDelete,
+    onEdit,
+    router,
+    showDelete,
+    showMoreIcon = true,
+}) => {
     const shadowStyles = {
         elevation: 1,
         shadowOffset: { height: 2, width: 0 },
@@ -51,6 +63,13 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow = true, item, rout
     const [loading, setLoading] = useState<boolean>(false);
 
     const liked = likes.filter((like) => like.userId === currentUser?.id)[0] ? true : false;
+
+    const handlePostDelete = () => {
+        Alert.alert('Confirm', 'Are you sure you want to do this?', [
+            { onPress: () => console.log('Modal cancelled'), text: 'Cancel', style: 'cancel' },
+            { onPress: () => onDelete?.(item), text: 'Delete', style: 'destructive' },
+        ]);
+    };
 
     const onLike = async () => {
         if (liked) {
@@ -112,6 +131,17 @@ const PostCard: FC<PostCardProps> = ({ currentUser, hasShadow = true, item, rout
                     <TouchableOpacity activeOpacity={0.7}>
                         <Icon color={theme.colors.text} name={'threeDotsHorizontal'} size={hp(3.4)} strokeWidth={3} />
                     </TouchableOpacity>
+                )}
+
+                {showDelete && currentUser?.id === item?.userId && (
+                    <View style={styles.actions}>
+                        <TouchableOpacity activeOpacity={0.7} onPress={() => onEdit?.(item)}>
+                            <Icon color={theme.colors.text} name={'edit'} size={hp(2.5)} />
+                        </TouchableOpacity>
+                        <TouchableOpacity activeOpacity={0.7} onPress={handlePostDelete}>
+                            <Icon color={theme.colors.rose} name={'delete'} size={hp(2.5)} />
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
 
