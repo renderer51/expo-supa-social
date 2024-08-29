@@ -10,10 +10,11 @@ import { hp } from '@/helpers';
 interface CommentItemProps {
     canDelete?: boolean;
     comment: any;
+    highlight?: boolean;
     onDelete?: (item: any) => void;
 }
 
-const CommentItem: FC<CommentItemProps> = ({ canDelete = false, comment, onDelete }) => {
+const CommentItem: FC<CommentItemProps> = ({ canDelete = false, comment, highlight = false, onDelete }) => {
     const handleDelete = () => {
         Alert.alert('Confirm', 'Are you sure you want to do this?', [
             { onPress: () => console.log('Modal cancel'), style: 'cancel', text: 'Cancel' },
@@ -25,7 +26,7 @@ const CommentItem: FC<CommentItemProps> = ({ canDelete = false, comment, onDelet
         <View style={styles.container}>
             <Avatar uri={comment?.user?.image} />
 
-            <View style={styles.content}>
+            <View style={[styles.content, highlight && styles.highlight]}>
                 <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={styles.nameContainer}>
                         <Text style={styles.text}>{comment?.user?.name}</Text>

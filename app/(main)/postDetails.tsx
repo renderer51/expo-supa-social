@@ -8,12 +8,19 @@ import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { hp, wp } from '@/helpers';
 import { supabase } from '@/lib/supabase';
-import { createPostComment, fetchPostDetails, getUserData, removePost, removePostComment } from '@/services';
+import {
+    createNotification,
+    createPostComment,
+    fetchPostDetails,
+    getUserData,
+    removePost,
+    removePostComment,
+} from '@/services';
 import { IPost } from '@/types';
 
 const PostDetails: FC = () => {
     const { user } = useAuth();
-    const { postId } = useLocalSearchParams();
+    const { commentId, postId } = useLocalSearchParams();
     const router = useRouter();
 
     const commentRef = useRef<string>('');
@@ -40,6 +47,16 @@ const PostDetails: FC = () => {
 
         if (res.success) {
             /** Send notification later */
+            if (user?.id !== post?.id) {
+                let notify = {
+                    data: JSON.stringify({ postId: post.id, commentId: res?.data?.id }),
+                    receiverId: post.userId,
+                    senderId: user?.id,
+                    title: 'Commented on your post',
+                };
+                createNotification(notify);
+            }
+
             inputRef.current?.clear();
             commentRef.current = '';
         } else {
@@ -174,9 +191,10 @@ const PostDetails: FC = () => {
                 <View style={{ gap: 17, marginVertical: 15 }}>
                     {post?.comments?.map((item: any) => (
                         <CommentItem
-                            key={item?.id?.toString()}
                             canDelete={item.userId === user?.id || user?.id === post.userId}
                             comment={item}
+                            highlight={item.id === commentId}
+                            key={item?.id?.toString()}
                             onDelete={onDeleteComment}
                         />
                     ))}

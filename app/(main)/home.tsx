@@ -18,6 +18,7 @@ const Home: FC = () => {
 
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [posts, setPosts] = useState<IPost[]>([]);
+    const [notificationCount, setNotificationCount] = useState(0);
 
     const getPosts = async () => {
         limit = limit + 10;
@@ -63,14 +64,30 @@ const Home: FC = () => {
         }
     };
 
+    const handleNewNotification = (payload: any) => {
+        if (payload.eventType === 'INSERT' && payload?.new?.id) {
+            setNotificationCount((prev) => prev + 1);
+        }
+    };
+
     useEffect(() => {
         let postChannel = supabase
             .channel('posts')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, handlePostEvent)
             .subscribe();
 
+        let notificationChannel = supabase
+            .channel('notifications')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', filter: `receiverId=eq.${user?.id}`, schema: 'public', table: 'notifications' },
+                handleNewNotification,
+            )
+            .subscribe();
+
         return () => {
             supabase.removeChannel(postChannel);
+            supabase.removeChannel(notificationChannel);
         };
     }, []);
 
@@ -81,8 +98,18 @@ const Home: FC = () => {
                 <Text style={styles.title}>{'LinkedUp'}</Text>
 
                 <View style={styles.icons}>
-                    <Pressable onPress={() => router.push('/notifications')}>
+                    <Pressable
+                        onPress={() => {
+                            setNotificationCount(0);
+                            router.push('/notifications');
+                        }}
+                    >
                         <Icon color={theme.colors.text} name={'heart'} size={hp(3.2)} strokeWidth={2} />
+                        {notificationCount > 0 && (
+                            <View style={styles.pill}>
+                                <Text style={styles.pillText}>{notificationCount}</Text>
+                            </View>
+                        )}
                     </Pressable>
                     <Pressable onPress={() => router.push('/newPost')}>
                         <Icon color={theme.colors.text} name={'plus'} size={hp(3.2)} strokeWidth={2} />

@@ -26,3 +26,13 @@ export interface IUser {
     name: string | null;
     phoneNumber: string | null;
 }
+
+export interface INotification {
+    create_at: Date;
+    data: string;
+    id: string;
+    receiverId: string;
+    sender?: IUser;
+    senderId: string;
+    title: string;
+}
