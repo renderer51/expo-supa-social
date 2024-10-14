@@ -1,50 +1,47 @@
-# Welcome to your Expo app 👋
+# Social Media App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![NodeJS Version](https://img.shields.io/badge/node-22.1.0-green)](https://nodejs.org/en/download/package-manager) [![Expo Version](https://img.shields.io/badge/expo-51.0.25-blue)](https://react.dev) [![React Native Version](https://img.shields.io/badge/react%20native-0.74.4-blue)](https://vite.dev) [![Java Version](https://img.shields.io/badge/java-11-blue)](https://vite.dev)
 
-## Get started
+![Image](https://codewithnomi.com/_next/image?url=https%3A%2F%2Fus-east-1-shared-usea1-02.graphassets.com%2Fclypunsq001nf07lec15b85ic%2Fclyve9g3o798h07l90hen5o5e&w=1080&q=75)
 
+## Setup
+
+### Terminal Commands
+
+1. [Install Node JS](https://nodejs.org/en/download/)
+1. [Install Android Studio](https://developer.android.com/studio/)
+1. [Install Xcode](https://developer.apple.com/xcode/)
+1. [Install Java Development](https://www.oracle.com/java/technologies/downloads/)
+1. Download or clone this repository
 1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
-2. Start the app
+1. Start on Android
 
-   ```bash
-    npx expo start
-   ```
+    ```bash
+    npm run android
+    ```
 
-In the output, you'll find options to open the app in a
+1. Start on IOS
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+    ```bash
+    npm run ios
+    ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Usage:
 
-## Get a fresh project
+Folder structure:
 
-When you're ready, run:
+-   **`app`**: A Layout is a screen and _layout.tsx is a layout components stack screens.
+-   **`assets`**: Fonts, Icons SVG, Images that should be imported directly into bundle source code.
+-   **`components`**: Reusable components written in React.JS.
+-   **`constants`**: Constants colors, dimensions in App.
+-   **`context`**: Global state in your React App.
+-   **`helpers`**: Functions support scale, v.v....
+-   **`lib`**: Config connect db.
+-   **`services`**: Script to request for db with models.
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The other files (such as `.prettierrc`, `tsconfig.json`) are configurations for libraries used in your application. Visit the library's documentation to learn how to use them.
