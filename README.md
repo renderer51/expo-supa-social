@@ -1,4 +1,4 @@
-# Social Media App
+# Frimse: An Advanced Social Networking App
 
 [![NodeJS Version](https://img.shields.io/badge/node-22.1.0-green)](https://nodejs.org/en/download/package-manager) [![Expo Version](https://img.shields.io/badge/expo-51.0.25-blue)](https://react.dev) [![React Native Version](https://img.shields.io/badge/react%20native-0.74.4-blue)](https://vite.dev) [![Java Version](https://img.shields.io/badge/java-11-blue)](https://vite.dev)
 
