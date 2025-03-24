@@ -23,8 +23,8 @@ const Login: FC = () => {
             return;
         }
 
-        let email = emailRef.current;
-        let password = passwordRef.current;
+        let email = emailRef.current.trim();
+        let password = passwordRef.current.trim();
 
         setLoading(true);
 
@@ -37,7 +37,7 @@ const Login: FC = () => {
         console.log('Error >>:', error);
 
         if (error) {
-            Alert.alert('Sign In', error.message);
+            Alert.alert('Login', error.message);
             return;
         }
     };

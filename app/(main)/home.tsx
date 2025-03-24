@@ -95,7 +95,7 @@ const Home: FC = () => {
         <ScreenWrapper bg={'white'}>
             {/** Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>{'LinkedUp'}</Text>
+                <Text style={styles.title}>{'Frimse'}</Text>
 
                 <View style={styles.icons}>
                     <Pressable

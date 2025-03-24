@@ -24,19 +24,21 @@ const SignUp: FC = () => {
             return;
         }
 
-        let email = emailRef.current;
-        let name = nameRef.current;
-        let password = passwordRef.current;
+        let email = emailRef.current.trim();
+        let name = nameRef.current.trim();
+        let password = passwordRef.current.trim() ;
 
         setLoading(true);
 
-        const {
-            data: { session },
-            error,
-        } = await supabase.auth.signUp({ email, options: { data: { name } }, password });
+        const {data: {session}, error} = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { name } }});
         setLoading(false);
-        console.log('Session >>:', session);
-        console.log('Error >>:', error);
+
+        //console.log('Session >>:', session);
+        //console.log('Error >>:', error);
 
         if (error) {
             Alert.alert('Sign Up', error.message);

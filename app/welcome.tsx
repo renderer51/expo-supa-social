@@ -23,9 +23,9 @@ const Welcome: FC = () => {
 
                 {/** Title */}
                 <View>
-                    <Text style={styles.title}>{'LinkUp!'}</Text>
+                    <Text style={styles.title}>{'FRIMSE'}</Text>
                     <Text style={styles.punchLine}>
-                        {'Where every thought finds a home and every image tells a story.'}
+                        {'An Advanced Social Networking App'}
                     </Text>
                 </View>
 

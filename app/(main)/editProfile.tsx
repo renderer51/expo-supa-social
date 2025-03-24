@@ -41,13 +41,13 @@ const EditProfile = () => {
         let userData = { ...user };
         let { address, bio, image, name, phoneNumber } = userData;
 
-        if (!address || !bio || !image || !name || !phoneNumber) {
+        if (!address || !bio ||  !name || !phoneNumber) {
             Alert.alert('Profile', 'Please fill all the fields');
             return;
         }
 
         setLoading(true);
-        if (image.includes('///')) {
+        if (typeof image == 'string' && image.includes('///')) {
             /** Upload image */
             let imageRes = await uploadFile('profiles', image, true);
             if (imageRes.success) {
@@ -62,12 +62,15 @@ const EditProfile = () => {
         setLoading(false);
 
         if (res.success) {
-            setUserData?.({ ...currentUser, ...userData });
+            const updatedUser = { ...currentUser, ...res.data };
+            setUserData?.(updatedUser);
+            setUser(updatedUser)
             router.back();
         }
 
         console.log('Update user result >>:', res);
     };
+//     let imageSource=user.image && typeof user.image== 'object'? user.image.uri: getUserImageSrc(user.image);
 
     useEffect(() => {
         if (currentUser) {
