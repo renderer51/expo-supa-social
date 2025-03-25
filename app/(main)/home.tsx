@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { hp, wp } from '@/helpers';
 import { fetchPosts, getUserData } from '@/services';
 import { IPost } from '@/types';
+import { BackHandler, Alert } from 'react-native';
 
 let limit = 0;
 const Home: FC = () => {
@@ -91,6 +92,7 @@ const Home: FC = () => {
         };
     }, []);
 
+
     return (
         <ScreenWrapper bg={'white'}>
             {/** Header */}
@@ -117,6 +119,7 @@ const Home: FC = () => {
                     <Pressable onPress={() => router.push('/profile')}>
                         <Avatar rounded={theme.radius.sm} size={hp(4.3)} style={{ borderWidth: 2 }} uri={user?.image} />
                     </Pressable>
+
                 </View>
             </View>
 

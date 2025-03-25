@@ -31,7 +31,7 @@ const Welcome: FC = () => {
 
                 {/** Footer */}
                 <View style={styles.footer}>
-                    <Button buttonStyle={{ marginHorizontal: wp(3) }} onPress={() => {}} title={'Getting Started'} />
+                    <Button buttonStyle={{ marginHorizontal: wp(3) }} onPress={() => router.push('/signUp')} title={'Getting Started'} />
 
                     <View style={styles.bottomTextContainer}>
                         <Text style={styles.loginText}>{'Already have an account!'}</Text>
@@ -83,10 +83,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     title: {
-        color: theme.colors.text,
+        co75lor: theme.colors.text,
         fontSize: hp(4),
         fontWeight: theme.fonts.extraBold,
         textAlign: 'center',
+
     },
     welcomeImage: {
         alignSelf: 'center',
