@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View, Alert } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View, Alert, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 
@@ -14,9 +14,60 @@ interface NearbyUser {
     id: string;
     username: string;
     image: string;
-    distance: number;
     lastSeen: string;
 }
+
+// Dummy data for demonstration
+const DUMMY_USERS: NearbyUser[] = [
+    {
+        id: '1',
+        username: 'Sarah Johnson',
+        image: 'https://i.pravatar.cc/150?img=1',
+        lastSeen: '2 minutes ago'
+    },
+    {
+        id: '2',
+        username: 'Mike Chen',
+        image: 'https://i.pravatar.cc/150?img=2',
+        lastSeen: '5 minutes ago'
+    },
+    {
+        id: '3',
+        username: 'Emma Wilson',
+        image: 'https://i.pravatar.cc/150?img=3',
+        lastSeen: '10 minutes ago'
+    },
+    {
+        id: '4',
+        username: 'David Kim',
+        image: 'https://i.pravatar.cc/150?img=4',
+        lastSeen: '15 minutes ago'
+    },
+    {
+        id: '5',
+        username: 'Lisa Anderson',
+        image: 'https://i.pravatar.cc/150?img=5',
+        lastSeen: '20 minutes ago'
+    },
+    {
+        id: '6',
+        username: 'James Smith',
+        image: 'https://i.pravatar.cc/150?img=6',
+        lastSeen: '30 minutes ago'
+    },
+    {
+        id: '7',
+        username: 'Sophie Brown',
+        image: 'https://i.pravatar.cc/150?img=7',
+        lastSeen: '45 minutes ago'
+    },
+    {
+        id: '8',
+        username: 'Alex Turner',
+        image: 'https://i.pravatar.cc/150?img=8',
+        lastSeen: '1 hour ago'
+    }
+];
 
 const Bubble: FC = () => {
     const router = useRouter();
@@ -24,18 +75,26 @@ const Bubble: FC = () => {
     const [loading, setLoading] = useState(true);
     const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const requestLocationPermission = async () => {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert(
-                'Permission Denied',
-                'Location permission is required to find nearby users.',
-                [{ text: 'OK' }]
-            );
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setError('Location permission is required to find nearby users.');
+                Alert.alert(
+                    'Permission Denied',
+                    'Location permission is required to find nearby users.',
+                    [{ text: 'OK' }]
+                );
+                return false;
+            }
+            return true;
+        } catch (err) {
+            setError('Failed to request location permission');
+            console.error('Location permission error:', err);
             return false;
         }
-        return true;
     };
 
     const getCurrentLocation = async () => {
@@ -46,7 +105,9 @@ const Bubble: FC = () => {
             setLocation(location);
             return location;
         } catch (error) {
-            Alert.alert('Error', 'Failed to get location');
+            setError('Failed to get location');
+            console.error('Location error:', error);
+            Alert.alert('Error', 'Failed to get location. Please make sure location services are enabled.');
             return null;
         }
     };
@@ -63,46 +124,25 @@ const Bubble: FC = () => {
     };
 
     const findNearbyUsers = async () => {
-        if (!location) return;
-
         try {
-            // Update user's location in the database
-            await supabase
-                .from('user_locations')
-                .upsert({
-                    user_id: user?.id,
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                    last_updated: new Date().toISOString(),
-                });
-
-            // Fetch nearby users (within 10km)
-            const { data: users, error } = await supabase
-                .from('user_locations')
-                .select('*, profiles:user_id(*)')
-                .neq('user_id', user?.id);
-
-            if (error) throw error;
-
-            const nearbyUsersWithDistance = users
-                .map(user => ({
-                    id: user.user_id,
-                    username: user.profiles.username,
-                    image: user.profiles.image,
-                    distance: calculateDistance(
-                        location.coords.latitude,
-                        location.coords.longitude,
-                        user.latitude,
-                        user.longitude
-                    ),
-                    lastSeen: user.last_updated,
-                }))
-                .filter(user => user.distance <= 10) // Filter users within 10km
-                .sort((a, b) => a.distance - b.distance);
-
-            setNearbyUsers(nearbyUsersWithDistance);
+            // For demonstration, we'll use dummy data
+            // In a real app, this would fetch from the database
+            setNearbyUsers(DUMMY_USERS);
+            
+            // Update user's location in the database (for real app)
+            if (location && user?.id) {
+                await supabase
+                    .from('user_locations')
+                    .upsert({
+                        user_id: user.id,
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                        last_updated: new Date().toISOString(),
+                    });
+            }
         } catch (error) {
             console.error('Error finding nearby users:', error);
+            setError('Failed to find nearby users');
             Alert.alert('Error', 'Failed to find nearby users');
         } finally {
             setLoading(false);
@@ -111,10 +151,22 @@ const Bubble: FC = () => {
 
     useEffect(() => {
         const initializeLocation = async () => {
+            if (Platform.OS === 'web') {
+                setError('Location services are not available in web browser');
+                setLoading(false);
+                return;
+            }
+
             const hasPermission = await requestLocationPermission();
             if (hasPermission) {
-                await getCurrentLocation();
-                await findNearbyUsers();
+                const location = await getCurrentLocation();
+                if (location) {
+                    await findNearbyUsers();
+                } else {
+                    setLoading(false);
+                }
+            } else {
+                setLoading(false);
             }
         };
 
@@ -124,16 +176,28 @@ const Bubble: FC = () => {
     const renderUser = ({ item }: { item: NearbyUser }) => (
         <Pressable
             style={styles.userCard}
-            onPress={() => router.push(`/profile/${item.id}`)}
+            onPress={() => router.push({
+                pathname: '/(main)/profile',
+                params: { id: item.id }
+            })}
         >
-            <Avatar rounded={theme.radius.sm} size={hp(5)} uri={item.image} />
+            <Image
+                source={{ uri: item.image }}
+                style={[styles.avatar, { borderRadius: theme.radius.sm, height: hp(5), width: hp(5) }]}
+            />
             <View style={styles.userInfo}>
                 <Text style={styles.username}>{item.username}</Text>
-                <Text style={styles.distance}>
-                    {item.distance.toFixed(1)} km away
-                </Text>
+                <Text style={styles.lastSeen}>{item.lastSeen}</Text>
             </View>
         </Pressable>
+    );
+
+    const renderEmptyComponent = () => (
+        <View style={styles.emptyContainer}>
+            <Icon name="user" size={hp(8)} color={theme.colors.textLight} />
+            <Text style={styles.emptyText}>No users nearby</Text>
+            <Text style={styles.emptySubText}>Check back later to find people around you</Text>
+        </View>
     );
 
     return (
@@ -141,11 +205,16 @@ const Bubble: FC = () => {
             <View style={styles.header}>
                 <Text style={styles.title}>Bubble</Text>
                 <Text style={styles.subtitle}>Find people nearby</Text>
+                <Text style={styles.radiusText}>Users in a 500m radius</Text>
             </View>
 
             {loading ? (
                 <View style={styles.loadingContainer}>
                     <Loading />
+                </View>
+            ) : error ? (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
                 </View>
             ) : (
                 <FlatList
@@ -153,13 +222,7 @@ const Bubble: FC = () => {
                     renderItem={renderUser}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
-                    ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>
-                                No users found nearby
-                            </Text>
-                        </View>
-                    }
+                    ListEmptyComponent={renderEmptyComponent}
                 />
             )}
         </ScreenWrapper>
@@ -186,6 +249,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: hp(20),
+    },
+    errorText: {
+        fontSize: hp(1.8),
+        color: theme.colors.rose,
+        textAlign: 'center',
+        marginHorizontal: wp(4),
+    },
     listContainer: {
         paddingHorizontal: wp(4),
     },
@@ -211,20 +286,39 @@ const styles = StyleSheet.create({
         fontWeight: theme.fonts.medium,
         color: theme.colors.text,
     },
-    distance: {
-        fontSize: hp(1.4),
-        color: theme.colors.gray,
-        marginTop: 2,
+    lastSeen: {
+        fontSize: hp(1.2),
+        color: theme.colors.textLight,
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: hp(20),
+        paddingHorizontal: wp(4),
     },
     emptyText: {
-        fontSize: hp(1.8),
-        color: theme.colors.gray,
+        fontSize: hp(2.2),
+        color: theme.colors.text,
+        marginTop: hp(2),
+        textAlign: 'center',
+    },
+    emptySubText: {
+        fontSize: hp(1.6),
+        color: theme.colors.textLight,
+        marginTop: hp(1),
+        textAlign: 'center',
+    },
+    avatar: {
+        borderColor: theme.colors.darkLight,
+        borderCurve: 'continuous',
+        borderWidth: 1,
+    },
+    radiusText: {
+        color: theme.colors.textLight,
+        fontSize: hp(2),
+        marginTop: hp(1),
+        fontWeight: theme.fonts.medium,
     },
 });
 
