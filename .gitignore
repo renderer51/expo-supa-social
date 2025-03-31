@@ -21,3 +21,6 @@ expo-env.d.ts
 
 # VSCODE
 /.vscode/
+
+# Environment variables
+.env

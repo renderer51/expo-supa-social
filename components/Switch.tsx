@@ -7,7 +7,7 @@ interface SwitchProps {
     onValueChange: (value: boolean) => void;
 }
 
-export const Switch: React.FC<SwitchProps> = ({ value, onValueChange }) => {
+const Switch: React.FC<SwitchProps> = ({ value, onValueChange }) => {
     return (
         <TouchableOpacity
             activeOpacity={0.7}
@@ -39,4 +39,6 @@ const styles = StyleSheet.create({
     activeThumb: {
         transform: [{ translateX: 24 }],
     },
-}); 
+});
+
+export default Switch; 
