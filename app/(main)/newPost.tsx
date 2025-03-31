@@ -5,9 +5,10 @@ import { Image } from 'expo-image';
 import { Video, ResizeMode } from 'expo-av';
 import { RichEditor } from 'react-native-pell-rich-editor';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import Icon from '@/assets/icons';
-import { Avatar, Button, Header, RichTextEditor, ScreenWrapper } from '@/components';
+import { Avatar, Button, Header, RichTextEditor, ScreenWrapper, Switch } from '@/components';
 import { theme } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { hp, wp } from '@/helpers';
@@ -22,6 +23,10 @@ const NewPost: FC = () => {
     const editorRef = useRef<RichEditor>(null);
     const [file, setFile] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [isScheduled, setIsScheduled] = useState<boolean>(false);
+    const [scheduledTime, setScheduledTime] = useState<Date>(new Date());
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
 
     const onPick = async (isImage: boolean) => {
         let mediaConfig: any = {
@@ -92,10 +97,16 @@ const NewPost: FC = () => {
             body: bodyRef.current,
             file,
             userId: user?.id,
+            is_scheduled: isScheduled,
+            status: isScheduled ? 'scheduled' : 'published',
         };
 
+        if (isScheduled) {
+            data.scheduled_time = scheduledTime.toISOString();
+        }
+
         if (post && post?.id) {
-            data.id === post.id;
+            data.id = post.id;
         }
 
         /** Create post */
@@ -115,10 +126,35 @@ const NewPost: FC = () => {
         }
     };
 
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            const newDate = new Date(scheduledTime);
+            newDate.setFullYear(selectedDate.getFullYear());
+            newDate.setMonth(selectedDate.getMonth());
+            newDate.setDate(selectedDate.getDate());
+            setScheduledTime(newDate);
+        }
+    };
+
+    const onTimeChange = (event: any, selectedTime?: Date) => {
+        setShowTimePicker(false);
+        if (selectedTime) {
+            const newDate = new Date(scheduledTime);
+            newDate.setHours(selectedTime.getHours());
+            newDate.setMinutes(selectedTime.getMinutes());
+            setScheduledTime(newDate);
+        }
+    };
+
     useEffect(() => {
-        if (post & post?.id) {
+        if (post && post?.id) {
             bodyRef.current = post?.body;
             setFile(post?.file || null);
+            if (post.is_scheduled) {
+                setIsScheduled(true);
+                setScheduledTime(new Date(post.scheduled_time));
+            }
             setTimeout(() => {
                 editorRef?.current?.setContentHTML(post?.body);
             }, 300);
@@ -167,6 +203,38 @@ const NewPost: FC = () => {
                         </View>
                     )}
 
+                    {/** Schedule Post */}
+                    <View style={styles.scheduleContainer}>
+                        <View style={styles.scheduleHeader}>
+                            <Text style={styles.scheduleTitle}>Schedule Post</Text>
+                            <Switch value={isScheduled} onValueChange={setIsScheduled} />
+                        </View>
+                        
+                        {isScheduled && (
+                            <View style={styles.scheduleOptions}>
+                                <TouchableOpacity 
+                                    style={styles.scheduleOption}
+                                    onPress={() => setShowDatePicker(true)}
+                                >
+                                    <Text style={styles.scheduleLabel}>Date</Text>
+                                    <Text style={styles.scheduleValue}>
+                                        {scheduledTime.toLocaleDateString()}
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity 
+                                    style={styles.scheduleOption}
+                                    onPress={() => setShowTimePicker(true)}
+                                >
+                                    <Text style={styles.scheduleLabel}>Time</Text>
+                                    <Text style={styles.scheduleValue}>
+                                        {scheduledTime.toLocaleTimeString()}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+
                     {/** Attach */}
                     <View style={styles.media}>
                         <Text style={styles.addImageText}>{'Add to your post'}</Text>
@@ -181,13 +249,32 @@ const NewPost: FC = () => {
                     </View>
                 </ScrollView>
 
+                {/** Date/Time Pickers */}
+                {showDatePicker && (
+                    <DateTimePicker
+                        value={scheduledTime}
+                        mode="date"
+                        display="default"
+                        onChange={onDateChange}
+                        minimumDate={new Date()}
+                    />
+                )}
+                {showTimePicker && (
+                    <DateTimePicker
+                        value={scheduledTime}
+                        mode="time"
+                        display="default"
+                        onChange={onTimeChange}
+                    />
+                )}
+
                 {/** Button submit */}
                 <Button
                     buttonStyle={{ height: hp(6.2) }}
                     hasShadow={false}
                     loading={loading}
                     onPress={onSubmit}
-                    title={post && post?.id ? 'Update' : 'Post'}
+                    title={isScheduled ? 'Schedule' : (post && post?.id ? 'Update' : 'Post')}
                 />
             </View>
         </ScreenWrapper>
@@ -271,6 +358,39 @@ const styles = StyleSheet.create({
         fontWeight: theme.fonts.semibold,
     },
     video: {},
+    scheduleContainer: {
+        backgroundColor: theme.colors.gray,
+        borderRadius: theme.radius.xl,
+        padding: 15,
+    },
+    scheduleHeader: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    scheduleTitle: {
+        color: theme.colors.text,
+        fontSize: hp(1.9),
+        fontWeight: theme.fonts.semibold,
+    },
+    scheduleOptions: {
+        gap: 12,
+        marginTop: 12,
+    },
+    scheduleOption: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    scheduleLabel: {
+        color: theme.colors.text,
+        fontSize: hp(1.7),
+    },
+    scheduleValue: {
+        color: theme.colors.primary,
+        fontSize: hp(1.7),
+        fontWeight: theme.fonts.medium,
+    },
 });
 
 export default NewPost;

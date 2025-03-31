@@ -9,6 +9,7 @@ import PostCard from './PostCard';
 import RichTextEditor from './RichTextEditor';
 import ScreenWrapper from './ScreenWrapper';
 import TextField from './TextField';
+import Switch from './Switch';
 
 export {
     Avatar,
@@ -22,4 +23,5 @@ export {
     RichTextEditor,
     ScreenWrapper,
     TextField,
+    Switch,
 };

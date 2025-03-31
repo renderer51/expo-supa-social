@@ -113,6 +113,9 @@ const Home: FC = () => {
                             </View>
                         )}
                     </Pressable>
+                    <Pressable onPress={() => router.push('/bubble')}>
+                        <Icon color={theme.colors.text} name={'location'} size={hp(3.2)} strokeWidth={2} />
+                    </Pressable>
                     <Pressable onPress={() => router.push('/newPost')}>
                         <Icon color={theme.colors.text} name={'plus'} size={hp(3.2)} strokeWidth={2} />
                     </Pressable>
